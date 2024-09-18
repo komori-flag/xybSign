@@ -26,6 +26,19 @@ const config = {
   ],
   qmsgKey: "", //qmsg酱key
   qmsgTo: "", //推送的qq号,用,分隔(可选)
+  mail: {
+    switch: false, //是否开启邮件推送
+    host: "", //邮箱服务器
+    port: 465, //邮箱端口
+    secure: true, //是否使用SSL
+    user: "", //邮箱用户名
+    pass: "", //邮箱密码
+    from: "", //发件人邮箱
+    to: "", //收件人邮箱
+    subject: "[校友邦-每日签到]", //邮件主题
+    text: "", //邮件正文
+    html: "", //邮件html内容
+  }
 };
 
 const modeCN = {
@@ -60,7 +73,7 @@ const apis = {
   duration: "behavior/Duration.action",
   ip: "behavior/Duration!getIp.action",
   // 地图api
-  map:"https://restapi.amap.com/v3/geocode/regeo",
+  map: "https://restapi.amap.com/v3/geocode/regeo",
 };
 
 const reports = [

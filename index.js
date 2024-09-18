@@ -1,6 +1,7 @@
 const { getHeaders } = require("./utils/xyb.js");
 let { config, apis, reports } = require("./config.js");
 const { sendMsg } = require("./utils/qmsg.js");
+const { sendMail } = require("./utils/smtp.js");
 const axios = require("axios");
 const fs = require("fs");
 const FormData = require("form-data");
@@ -574,19 +575,19 @@ async function xybSign(config) {
     // 使用Haversine公式计算新坐标的经度和纬度
     const newLatitudeRadians = Math.asin(
       Math.sin(originalLatitudeRadians) * Math.cos(distanceInRadians) +
-        Math.cos(originalLatitudeRadians) *
-          Math.sin(distanceInRadians) *
-          Math.cos(directionInRadians)
+      Math.cos(originalLatitudeRadians) *
+      Math.sin(distanceInRadians) *
+      Math.cos(directionInRadians)
     );
 
     const newLongitudeRadians =
       originalLongitudeRadians +
       Math.atan2(
         Math.sin(directionInRadians) *
-          Math.sin(distanceInRadians) *
-          Math.cos(originalLatitudeRadians),
+        Math.sin(distanceInRadians) *
+        Math.cos(originalLatitudeRadians),
         Math.cos(distanceInRadians) -
-          Math.sin(originalLatitudeRadians) * Math.sin(newLatitudeRadians)
+        Math.sin(originalLatitudeRadians) * Math.sin(newLatitudeRadians)
       );
 
     // 将新的经纬度坐标转换为度数，并保留与传入参数相同的小数位数
@@ -707,6 +708,15 @@ async function run() {
   console.log(results.join("\n"));
   if (config.qmsgKey) {
     await sendMsg(results.join("\n"), config);
+  }
+  if (config.mail.switch) {
+    try {
+      config.mail["text"] = results.join("\n");
+      await sendMail(config.mail);
+      console.log("smtp消息发送成功");
+    } catch (err) {
+      console.log("smtp消息发送失败");
+    }
   }
 }
 
