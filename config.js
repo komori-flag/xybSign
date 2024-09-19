@@ -38,7 +38,8 @@ const config = {
     subject: "[校友邦-每日签到]", //邮件主题
     text: "", //邮件正文
     html: "", //邮件html内容
-  }
+  },
+  cron: "* * * * * *" // CRON 表达式，默认为单次运行
 };
 
 const modeCN = {

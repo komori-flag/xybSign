@@ -2,6 +2,7 @@ const { getHeaders } = require("./utils/xyb.js");
 let { config, apis, reports } = require("./config.js");
 const { sendMsg } = require("./utils/qmsg.js");
 const { sendMail } = require("./utils/smtp.js");
+const cron = require("node-cron");
 const axios = require("axios");
 const fs = require("fs");
 const FormData = require("form-data");
@@ -611,7 +612,8 @@ async function xybSign(config) {
     }
     const tasks = await getTasks();
     const result = await doTasks(tasks);
-    results += `###${accountInfo.loginer}###
+    // results += `###${accountInfo.loginer}###
+    results += `###${accountInfo.loginer[0] + "*".repeat(accountInfo.loginer.length - 1)}###
 ${result}`;
     // await sendMsg(result);
   };
@@ -697,12 +699,12 @@ async function run() {
   }
 
   for (const account of config.accounts) {
-    // console.log(account);
-    account.mode = config.mode;
-    account.modeCN = config.modeCN;
-    account.password = md5(account.password);
-    results.push(await xybSign(account));
-    console.log(`====当前账号(${account.username})执行结束====`);
+    const accountTemp = { ...account };
+    accountTemp.mode = config.mode;
+    accountTemp.modeCN = config.modeCN;
+    accountTemp.password = md5(account.password);
+    results.push(await xybSign(accountTemp));
+    console.log(`====当前账号(${accountTemp.username.slice(-4)})执行结束====`);
   }
   console.log("====所有账号执行结束====");
   console.log(results.join("\n"));
@@ -720,4 +722,16 @@ async function run() {
   }
 }
 
-run();
+if (config.cron === '* * * * * *') {
+  run().then(() => {
+    console.log("执行结束");
+    process.exit(0);
+  });
+} else {
+  cron.schedule(config.cron, async () => {
+    console.log("触发执行");
+    await run();
+    if (config.cron === '* * * * * *') process.exit(0);
+    console.log("本次执行结束，等待下次执行");
+  });
+}
